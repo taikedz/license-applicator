@@ -1,0 +1,108 @@
+#!/bin/bash
+
+### License Applicator Usage:help
+#
+# Apply a license to files, or write a LICENSE.txt file in the current directory
+#
+# 	apply-license set LICENSE [DIRECTORY] EXTENSIONS ...
+# 	apply-license list [FILTER]
+# 	apply-license show LICENSE
+#
+#`set` mode
+#
+# If the first argument is a directory, the long-form of the license text will be written in a ./LICENSE.txt file
+#
+# The EXTENSIONS must be a simple list of extensions, for example `apply-license set GPLv3 -- .py .sh .c`
+#
+# `list` mode
+#
+# List the available licenses
+#
+# `show` mode
+#
+# Show the raw text of the license
+#
+# Library
+# =======
+#
+# You can include apply-license as a library ; pass the same arguments as above to the `al:main` function.
+#
+###/doc
+
+al:check-help() {
+	autohelp:check "$@"
+	if [[ -z "$*" ]]; then
+		autohelp:print
+		exit 0
+	fi
+}
+
+al:list-licenses() {
+	al:license-store:files | grep "${1:-}"
+}
+
+al:show-license() {
+	local license
+	license="$(al:license-store:get "$1")" || out:fail "Invalid license name '${1:-}'"
+
+	cat "$license"
+}
+
+al:add-license() {
+	local license
+	license="$1"; shift
+
+	# get the actual file
+	# extract verification string
+	# extract short form
+	# perform author replacements
+	
+	# find based on extension, for each file:
+		# check if file has the verification string
+		# if not, check for shebang string
+		# add at appropriate insert line
+}
+
+al:write-license() {
+	local license directory
+	license="$1"; shift
+	directory="$1"; shift
+
+	# get the actual file
+	# extract long form
+	# perform author replacements
+}
+
+al:set-license() {
+	local license directory
+
+	license="$1"; shift
+	directory="/"; shift
+
+	[[ -n "$*" ]] || out:fail "No directory or extenstions supplied."
+
+	if [[ -e "$1" ]] && [[ -d "$1" ]]; then
+		directory="$1"; shift
+	fi
+
+	al:write-license "$license" "$directory"
+
+	al:add-license "$license" "$@"
+}
+
+al:main() {
+	al:check-help
+
+	local action="$1"; shift
+
+	case "$action"
+	set)
+		al:set-license "$@" ;;
+	list)
+		al:list-licenses "$@" ;;
+	show)
+		al:show-license "$@" ;;
+	esac
+}
+
+runmain apply-license al:main "$@"
